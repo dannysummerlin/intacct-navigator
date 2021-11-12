@@ -21,7 +21,7 @@ getSessionID = ()=>{
 	return window.location.search.match(/\.sess=(.*)&*/)[1]
 }
 
-var sfnav = (()=>{
+var intacctNavigator = (()=>{
 	function loadCommands(force) {
 		if(serverInstance == null || orgId == null || sessionId == null) { init(); return false }
 		commands['Refresh Metadata'] = {}
