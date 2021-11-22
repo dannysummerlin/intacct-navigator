@@ -313,6 +313,13 @@ var intacctNavigator = (()=>{
 			f.value = f.value.replace(/[^\w\d]/g, '_')
 		})
 	}
+	const sortOptionsAlpha = ()=>{
+		// TODO figure out sorting
+		[...document.getElementsByTagName('select')].forEach(s=>{
+			const sortedOptions = [...s.options].sort((a,b)=>{ a.text < b.text ? -1 : 1 })
+			s.replaceChildren(sortedOptions) // probably wrong, but this captures the idea
+		})
+	}
 
 // setup
 	init = ()=>{
@@ -320,6 +327,7 @@ var intacctNavigator = (()=>{
 			document.onkeyup = ev => window.ctrlKey = ev.ctrlKey
 			document.onkeydown = ev => window.ctrlKey = ev.ctrlKey
 			document.getElementsByClassName('api_name').onchange = ev => fixFieldNames(ev.target)
+			sortOptionsAlpha()
 			// if ( getSetting('autoExpandAll') )
 				// expandAll()
 			// serverInstance = getServerInstance()
