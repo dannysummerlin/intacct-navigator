@@ -1,7 +1,7 @@
 // @copyright 2012+ Daniel Nakov / Silverline CRM
 // http://silverlinecrm.com
 // @copyright 2019+ Danny Summerlin
-let sessionHash = null
+let sessionId = null
 let serverInstance = '' // figure out if this is the same for every tenant
 let apiUrl = '' // make this optional for Intacct
 let ctrlKey = false
@@ -10,17 +10,9 @@ let searchBox
 let listPosition = -1
 let mouseClickLoginAsUserId
 let loaded = false
-const backupOpenInIFrame = openInIFrame
-
-const openInIFrame = (url)=>{
-	if(window.ctrlKey)
-		openInNewWindow(url)
-	else
-		backupOpenInIFrame('iamain', url)
-}
 
 var intacctNavigator = (()=>{
-	function loadCommands(force) {
+	const loadCommands = (force)=>{
 		if(serverInstance == null || sessionId == null) { init(); return false }
 		commands['Refresh Metadata'] = {}
 		commands['Merge Accounts'] = {}
@@ -28,7 +20,7 @@ var intacctNavigator = (()=>{
 		commands['?'] = {}
 		commands['Home'] = {}
 		let options = {
-			sessionHash: sessionHash,
+			sessionId: sessionId,
 			apiUrl: apiUrl
 		}
 		let menu = []
@@ -50,7 +42,7 @@ var intacctNavigator = (()=>{
 		// })
 		hideLoadingIndicator()
 	}
-	function invokeCommand(cmd, newTab, event) {
+	const invokeCommand = (cmd, newTab, event)=>{
 		if(cmd == "") { return false }
 		let checkCmd = cmd.toLowerCase()
 		let targetUrl = ""
@@ -84,16 +76,10 @@ var intacctNavigator = (()=>{
 			return true
 		} else { return false }
 	}
-	var goToUrl = (url, newTab)=>{ chrome.runtime.sendMessage({
-			action: 'goToUrl',
-			url: url,
-			newTab: newTab
-		}, function(response) {})
-	}
-	var searchTerms = (terms)=>{
+	const searchTerms = (terms)=>{
 		return serverInstance + "/search?str=" + encodeURI(terms)
 	}
-	var pasteFromClipboard = (newtab)=>{
+	const pasteFromClipboard = (newtab)=>{
 		let cb = document.createElement("textarea")
 		let body = document.getElementsByTagName('body')[0]
 		body.appendChild(cb)
@@ -102,6 +88,16 @@ var intacctNavigator = (()=>{
 		const clipboardValue = cb.value.trim()
 		cb.remove()
 		return clipboardValue
+	}
+	const goToUrl = (url, newTab)=>{ 
+		if(newTab)
+			chrome.runtime.sendMessage({
+				action: 'goToUrl',
+				url: url,
+				newTab: newTab
+			}, (response)=>{})
+		else
+			document.getElementById('iamain').setLocation(url)
 	}
 
 // ================================================================================================
@@ -123,12 +119,12 @@ var intacctNavigator = (()=>{
 		}
 		return Mousetrap
 	})(Mousetrap)
-	var mouseHandler = function() {
+	const mouseHandler = function() {
 		this.classList.add('nav_selected')
 		mouseClickLoginAsUserId = this.getAttribute("id")
 		return true
 	}
-	var mouseClick = function() {
+	const mouseClick = function() {
 		document.getElementById("nav_quickSearch").value = this.firstChild.nodeValue
 		listPosition = -1
 		setVisibleSearch("hidden")
@@ -138,19 +134,18 @@ var intacctNavigator = (()=>{
 			hideSearchBox()
 		return true
 	}
-	var mouseHandlerOut = function() { this.classList.remove('nav_selected'); return true }
-	var mouseClickLoginAs = function() { loginAsPerform(mouseClickLoginAsUserId); return true }
+	const mouseHandlerOut = function() { this.classList.remove('nav_selected'); return true }
 	function bindShortcuts() {
 		let searchBar = document.getElementById('nav_quickSearch')
-		Mousetrap.bindGlobal('esc', function(e) { hideSearchBox() })
+		Mousetrap.bindGlobal('esc', (e)=>{ hideSearchBox() })
 		Mousetrap.wrap(searchBar).bind('enter', kbdCommand)
-		for (var i = 0; i < newTabKeys.length; i++) {
+		for (var i = newTabKeys.length; i >= 0; i--) {
 			Mousetrap.wrap(searchBar).bind(newTabKeys[i], kbdCommand)
 		}
 		Mousetrap.wrap(searchBar).bind('down', selectMove.bind(this, 'down'))
 		Mousetrap.wrap(searchBar).bind('up', selectMove.bind(this, 'up'))
 		Mousetrap.wrap(document.getElementById('nav_quickSearch')).bind('backspace', function(e) { listPosition = -1 })
-		document.getElementById('nav_quickSearch').oninput = function(e) {
+		document.getElementById('nav_quickSearch').oninput = (e)=>{
 			lookAt()
 			return true
 		}
@@ -301,25 +296,22 @@ var intacctNavigator = (()=>{
 // ------------------------------------------------
 
 // setup
-	function init() {
+	init = ()=>{
 		try {
 			document.onkeyup = (ev)=>{ window.ctrlKey = ev.ctrlKey }
 			document.onkeydown = (ev)=>{ window.ctrlKey = ev.ctrlKey }
 			serverInstance = getServerInstance()
-			sessionHash = getSessionHash()
+			sessionId = getSessionId()
 
 			if(sessionId == null) {
-				chrome.runtime.sendMessage({ action: 'getApiSessionId', key: orgId }, response=>{
-					if(response.error) console.log("response", orgId, response, chrome.runtime.lastError)
-					else {
-						sessionId = unescape(response.sessionId)
-						userId = unescape(response.userId)
-						apiUrl = unescape(response.apiUrl)
-						var div = document.createElement('div')
-						div.setAttribute('id', 'nav_searchBox')
-						var loaderURL = chrome.extension.getURL("images/ajax-loader.gif")
-						var logoURL = chrome.extension.getURL("images/navigator128.png")
-						div.innerHTML = `
+				sessionId = getSessionId()
+				// userId = unescape(response.userId)
+				// apiUrl = unescape(response.apiUrl)
+				let div = document.createElement('div')
+				div.setAttribute('id', 'nav_searchBox')
+				const loaderURL = chrome.extension.getURL("images/ajax-loader.gif")
+				const logoURL = chrome.extension.getURL("images/navigator128.png")
+				div.innerHTML = `
 <div class="nav_wrapper">
 	<input type="text" id="nav_quickSearch" autocomplete="off"/>
 	<img id="nav_loader" src= "${loaderURL}"/>

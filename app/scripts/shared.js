@@ -1,4 +1,4 @@
-const getSessionID = ()=>{
+const getSessionId = ()=>{
 	// do I need to check anything in document.cookie?
 	return window.location.search.match(/\.sess=(.*)&*/)[1]
 }
