@@ -293,25 +293,44 @@ var intacctNavigator = (()=>{
 			}
 		}
 	}
+
 // ------------------------------------------------
+// Intacct Specific
+	const toggleExpandAll = ()=>{
+		// TODO find expansion toggle classname
+		// also maybe this should be a toggle that happens automatically on page load?
+		// Or adds a button to the page so it is more obvious?
+		document.getElementsByClassName('expand').click()
+	}
+	const fixFieldNames = (field)=>{
+		// doing this so it can either be called manually or autotriggered, we'll see which is actually useful
+		let fields = []
+		if(field)
+			fields.push(field)
+		else // TODO find API Name field classname
+			fields = [...document.getElementsByClassName('api_name')]
+		fields.forEach(f=>{
+			f.value = f.value.replace(/[^\w\d]/g, '_')
+		})
+	}
 
 // setup
 	init = ()=>{
 		try {
-			document.onkeyup = (ev)=>{ window.ctrlKey = ev.ctrlKey }
-			document.onkeydown = (ev)=>{ window.ctrlKey = ev.ctrlKey }
-			serverInstance = getServerInstance()
+			document.onkeyup = ev => window.ctrlKey = ev.ctrlKey
+			document.onkeydown = ev => window.ctrlKey = ev.ctrlKey
+			document.getElementsByClassName('api_name').onchange = ev => fixFieldNames(ev.target)
+			// if ( getSetting('autoExpandAll') )
+				// expandAll()
+			// serverInstance = getServerInstance()
 			sessionId = getSessionId()
-
-			if(sessionId == null) {
-				sessionId = getSessionId()
-				// userId = unescape(response.userId)
-				// apiUrl = unescape(response.apiUrl)
-				let div = document.createElement('div')
-				div.setAttribute('id', 'nav_searchBox')
-				const loaderURL = chrome.extension.getURL("images/ajax-loader.gif")
-				const logoURL = chrome.extension.getURL("images/navigator128.png")
-				div.innerHTML = `
+			// userId = unescape(response.userId)
+			// apiUrl = unescape(response.apiUrl)
+			let div = document.createElement('div')
+			div.setAttribute('id', 'nav_searchBox')
+			const loaderURL = chrome.extension.getURL("images/ajax-loader.gif")
+			const logoURL = chrome.extension.getURL("images/navigator128.png")
+			div.innerHTML = `
 <div class="nav_wrapper">
 	<input type="text" id="nav_quickSearch" autocomplete="off"/>
 	<img id="nav_loader" src= "${loaderURL}"/>
@@ -320,14 +339,11 @@ var intacctNavigator = (()=>{
 <div class="nav_shadow" id="nav_shadow"/>
 <div class="nav_output" id="nav_output"/>
 `
-						document.body.appendChild(div)
-						searchBox = document.getElementById("nav_output")
-						hideLoadingIndicator()
-						bindShortcuts()
-						loadCommands()
-					}
-				})
-			}
+			document.body.appendChild(div)
+			searchBox = document.getElementById("nav_output")
+			hideLoadingIndicator()
+			bindShortcuts()
+			loadCommands()
 		} catch(e) { if(debug) console.log(e) }
 	}
 	init()

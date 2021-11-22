@@ -25,3 +25,16 @@ const newTabKeys = [ "ctrl+enter", "command+enter", "shift+enter" ]
 const setupLabelsToUrlMap = {
 	// "Home": "/",
 }
+
+
+// <a href="pt_objectView.phtml?.sess=wjnZFTYRhVrRnIdgq7Q0rg7EWtCchw..&.op=3800&objDefId=10009">Program Type</a>
+/* REFERENCE this is the Intacct function
+function openInIFrame(iframe, URL) {
+	QXUtil.removeLSItem(QXUtil.GoToList.keys.LAST_LISTER_ID);
+	QXUtil.GoToList.clearRuntimeListerMap();
+	var b = document.getElementById(iframe);
+	jq.Topic("iframechanging").publish(URL);
+	b.src = a;
+	QXAppMenu.hideMenu()
+}
+*/
