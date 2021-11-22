@@ -320,6 +320,13 @@ var intacctNavigator = (()=>{
 			s.replaceChildren(sortedOptions) // probably wrong, but this captures the idea
 		})
 	}
+	const buttonAffordance = ()=>{
+		// TODO build CSS overrides, have them be toggle-able from the navigator
+		const newButtonStyle = `
+.button { font-size: 2rem; float: right }
+`
+		// and/or maybe duplicate them so they are on the top right and on the bottom
+	}
 
 // setup
 	init = ()=>{
@@ -330,10 +337,7 @@ var intacctNavigator = (()=>{
 			sortOptionsAlpha()
 			// if ( getSetting('autoExpandAll') )
 				// expandAll()
-			// serverInstance = getServerInstance()
 			sessionId = getSessionId()
-			// userId = unescape(response.userId)
-			// apiUrl = unescape(response.apiUrl)
 			let div = document.createElement('div')
 			div.setAttribute('id', 'nav_searchBox')
 			const loaderURL = chrome.extension.getURL("images/ajax-loader.gif")
